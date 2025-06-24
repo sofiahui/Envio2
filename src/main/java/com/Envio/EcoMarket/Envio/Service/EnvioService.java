@@ -8,10 +8,9 @@ import org.springframework.stereotype.Service;
 import com.Envio.EcoMarket.Envio.Modelo.Envio;
 import com.Envio.EcoMarket.Envio.Repository.EnvioRepository;
 
-import jakarta.transaction.Transactional;
+
 
 @Service
-@Transactional
 public class EnvioService {
    
     @Autowired
@@ -22,14 +21,14 @@ public class EnvioService {
     }
 
     public Envio findById(Integer id){
-        return envioRepository.findById(id).get();
+        return envioRepository.findById(id).orElse(null);
     }
 
     public Envio save(Envio envio){
         return envioRepository.save(envio);
     }
 
-    public void delete (Integer id){
+    public void deleteById (Integer id){
         envioRepository.deleteById(id);
     }
 }

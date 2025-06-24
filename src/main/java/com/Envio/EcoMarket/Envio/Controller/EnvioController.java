@@ -3,29 +3,23 @@ package com.Envio.EcoMarket.Envio.Controller;
 
 import java.util.List;
 
-
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.Envio.EcoMarket.Envio.Modelo.Envio;
 import com.Envio.EcoMarket.Envio.Service.EnvioService;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
-
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 
 @RestController
 @RequestMapping("api/v1/envios")
+@Tag(name = "Envios", description = "Operaciones relacionadas con los envios")
 
 public class EnvioController {
 
@@ -33,60 +27,67 @@ public class EnvioController {
     private EnvioService envioService;
 
     @GetMapping
-    public ResponseEntity<List<Envio>> listar(){
-        List<Envio> envios = envioService.findAll();
-        if (envios.isEmpty()){
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(envios);
+    @Operation(summary = "Obtener todos los envios", description = "Obtiene una lista de todos los envios")
+    public List<Envio> getAllEnvios() {
+        return envioService.findAll();
     }
     
+     @GetMapping("/{id}")
+    @Operation(summary = "Obtener un envio por ID", description = "Retorna un envio según su ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Envio encontrado",
+                content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = Envio.class))),
+        @ApiResponse(responseCode = "404", description = "Envio no encontrado")
+    })
+
+    public Envio getEnvioById(@PathVariable Integer id) {
+        return envioService.findById(id);
+    }
+
+
     @PostMapping
-    public ResponseEntity <Envio> guardar (@RequestBody Envio envio){
-        Envio envioNuevo = envioService.save(envio);
-        return ResponseEntity.status(HttpStatus.CREATED).body(envioNuevo);
-    }
-    
-    @GetMapping("{id}")
-    public ResponseEntity<Envio> buscar(@PathVariable Integer id){
-        try{
-            Envio envio = envioService.findById(id);
-            return ResponseEntity.ok(envio);
-        }
-        catch (Exception e){
-            return ResponseEntity.notFound().build();
-        }
-    }
-    
-    @PutMapping("{id}")
-    public ResponseEntity<Envio> actualizar(@PathVariable Integer id, @RequestBody Envio envio) {
-        try{
-            Envio envi = envioService.findById(id);
+    @Operation(summary = "Crear un nuevo envio", description = "Registra un nuevo envio en el sistema")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Envio creado exitosamente",
+                content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = Envio.class))),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos")
+          })
 
-            envi.setId(id);
-            envi.setTrackingId(envio.getTrackingId());
-            envi.setDireccionEntrega(envio.getDireccionEntrega());
-            envi.setFechaEnvio(envio.getFechaEnvio());
-            envi.setFechaEntrega(envio.getFechaEntrega());
-            envi.setMetodoEnvio(envio.getMetodoEnvio());
-            envi.setEstadoEnvio(envio.getEstadoEnvio());
-            envi.setCostoEnvio(envio.getCostoEnvio());
 
-            envioService.save(envi);
-            return ResponseEntity.ok(envio);
-        }catch (Exception e){
-            return ResponseEntity.notFound().build();
-        }
-        
-    }
     
+    public Envio createEnvio(@RequestBody Envio envio) {
+        return envioService.save(envio);
+    }
+
+    
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar un envio",description = "Actualiza un envio existente")
+    @ApiResponses(value = {
+         @ApiResponse (responseCode = "200", description = "Envio actualizado exitosamente",
+                 content = @Content(mediaType = "application/json",
+                 schema = @Schema (implementation = Envio.class))),
+                 @ApiResponse(responseCode = "404", description = "Envio no encontrada")
+    })
+    
+    
+    public Envio updateEnvio(@PathVariable Integer id, @RequestBody Envio envio){
+        envio.setId(id);
+        return envioService.save(envio);
+    }
+
+
+
     @DeleteMapping("{id}")
-    public ResponseEntity<Envio> eliminar (@PathVariable Integer id){
-        try{
-            envioService.delete(id);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e){
-            return ResponseEntity.notFound().build();
-        }
-    }
-}
+    @Operation(summary = "Eliminar un envio", description = "Eliminar un envio por su id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "Envio eliminado exitosamente" ),
+            @ApiResponse(responseCode = "404", description = "Envio no encontrado ")
+    })
+   
+    public void deleteEnvio(@PathVariable Integer id ){
+        envioService.deleteById(id);
+     }
+
+} 
