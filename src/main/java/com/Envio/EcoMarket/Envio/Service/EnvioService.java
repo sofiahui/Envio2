@@ -8,9 +8,12 @@ import org.springframework.stereotype.Service;
 import com.Envio.EcoMarket.Envio.Modelo.Envio;
 import com.Envio.EcoMarket.Envio.Repository.EnvioRepository;
 
+import jakarta.transaction.Transactional;
+
 
 
 @Service
+@Transactional
 public class EnvioService {
    
     @Autowired
